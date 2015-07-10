@@ -25,24 +25,53 @@ SimplePhysicObject* SimplePhysicObject::create(SPOT _type)
 		return ref;
 	}
 	else{
-		delete ref; 
+		delete ref;
 		ref = NULL;
 		return ref;
 	}
 }
 bool SimplePhysicObject::init()
 {
+	this->objectFilterType = SFT::SFT_NATURE_ENTITY;
 	//-- init for debug method
 	debugDraw = DrawNode::create();
-	//-- init object infor
+	//-- init object info
 	verlocity = { 0, 0 };
 	return true;
 }
 
-void SimplePhysicObject::update(float dt, const std::vector<SimplePhysicObject*>& staticObjs)
+void SimplePhysicObject::updateForPlatform(float dt, const std::vector<SimplePhysicObject*>& platformObjs)
 {
 	if (this->type == SPOT::SPOT_DYNAMIC){
+		if (isJump) {
+			isOnPlatform = false;
+			return;
+		}
+		for (int i = 0; i < platformObjs.size(); i++)
+		{
+			if (round(this->position.x / 64) == round(platformObjs[i]->getPosition().x / 64) && round(this->position.y / 64) == round(platformObjs[i]->getPosition().y / 64))
+			{
+				isOnPlatform = true;
+				return;
+			}else
+			{
+				if (round(this->position.y / 64) - 1 >= 0){
+					if (round(this->position.x / 64) == round(platformObjs[i]->getPosition().x / 64) && round(this->position.y / 64) - 1 == round(platformObjs[i]->getPosition().y / 64))
+					{
+						isOnPlatform = true;
+						return;
+					}
+				}
+			}
+		}
+		isOnPlatform = false;
+	}
+}
 
+void SimplePhysicObject::updateForStatic(float dt, const std::vector<SimplePhysicObject*>& staticObjs)
+{
+	if (this->type == SPOT::SPOT_DYNAMIC){
+		//if (isOnPlatform) return;
 		//--- flag to check what kind if collision has occurred
 		bool collideX = true, collideBottom = true, collideTop = true;
 
@@ -236,7 +265,11 @@ void SimplePhysicObject::update(float dt, const std::vector<SimplePhysicObject*>
 		//////////////////////////////////////////////////////////////////////////////
 		//--- apply gravity
 		///////////////////////////////////////////////////////////////////////////////
-		verlocity.y -= 0.5f;
+		if (!isOnPlatform)
+		{
+			verlocity.y -= 0.5f;
+		}
+		
 
 
 

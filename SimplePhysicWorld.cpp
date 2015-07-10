@@ -47,7 +47,8 @@ void SimplePhysicWorld::update(float dt)
 {
 	for (int i = 0; i < this->childrenDynamic.size(); i++)
 	{
-		this->childrenDynamic[i]->update(dt,this->childrenStatic);
+		this->childrenDynamic[i]->updateForStatic(dt, this->childrenStatic);
+		this->childrenDynamic[i]->updateForPlatform(dt, this->childrenPlatform);
 	}
 }
 
@@ -67,4 +68,33 @@ void SimplePhysicWorld::addChild(SimplePhysicObject* child)
 		this->childrenPlatform.push_back(child);
 		if (this->debugDrawer != NULL) child->setDebugInfo(child->getSize(), Color4F::GREEN, this->debugDrawer);
 	}
+
+	this->isDirty = true;
+}
+
+std::vector<SimplePhysicObject*> SimplePhysicWorld::getAllChildren()
+{
+	if (this->isDirty){
+		this->allChildrenTemp.clear();
+		this->allChildrenTemp.reserve(this->childrenDynamic.size() + this->childrenPlatform.size() + this->childrenStatic.size());
+		this->allChildrenTemp.insert(this->allChildrenTemp.end(), this->childrenDynamic.begin(), this->childrenDynamic.end());
+		this->allChildrenTemp.insert(this->allChildrenTemp.end(), this->childrenPlatform.begin(), this->childrenPlatform.end());
+		this->allChildrenTemp.insert(this->allChildrenTemp.end(), this->childrenStatic.begin(), this->childrenStatic.end());
+	}
+	return this->allChildrenTemp;
+}
+
+std::vector<SimplePhysicObject*> SimplePhysicWorld::getAllChildrenWithFilter(std::vector<SimplePhysicObject::SFT> _filter)
+{
+	std::vector<SimplePhysicObject*> result;
+	std::vector<SimplePhysicObject*> childTemp = this->getAllChildren();
+	for (int i = 0; i < childTemp.size(); i++)
+	{
+		//-- try to find this filter on list 
+		if (std::find(_filter.begin(), _filter.end(), childTemp[i]->getObjectFilterType()) != _filter.end())
+		{
+			result.push_back(childTemp[i]);
+		}
+	}
+	return result;
 }

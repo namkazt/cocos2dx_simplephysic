@@ -7,6 +7,10 @@
 class SimplePhysicWorld
 {
 private:
+	//----- store temp all child
+	std::vector<SimplePhysicObject*> allChildrenTemp;
+	bool isDirty = false;
+	//--------------------
 	std::vector<SimplePhysicObject*> childrenDynamic;
 	std::vector<SimplePhysicObject*> childrenStatic;
 	std::vector<SimplePhysicObject*> childrenPlatform;
@@ -26,6 +30,9 @@ public:
 	cocos2d::Vec2 getGravity(){ return this->gravity; };
 	//-----------------------
 	void addChild(SimplePhysicObject* child);
+	//-----------------------
+	std::vector<SimplePhysicObject*> getAllChildren();
+	std::vector<SimplePhysicObject*> getAllChildrenWithFilter(std::vector<SimplePhysicObject::SFT> _filter);
 };
 
 #endif
